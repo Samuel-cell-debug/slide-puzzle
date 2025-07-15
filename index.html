@@ -1,44 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8" />
- <title>Samuel's Slide Puzzle</title>
- <link rel="stylesheet" href="style.css" />
- <link rel="icon" href="favicon.ico" />
+  <meta charset="UTF-8" />
+  <title>Samuel's Slide Puzzle</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="favicon.ico" />
 </head>
 <body>
- <h1>Samuel's Slide Puzzle</h1>
- 
- <div id="stats">
-  <span id="moveDisplay">move: 0</span> |
-  <span id="timerDisplay">time: 0s</span>
- </div>
- 
- <div id="puzzle"></div>
- 
- <div id="stats">
-  <span id="moveDisplay">Move: 0</span> |
-  <span id="timerDisplay">Time: 0s</span> |
-  <span id="bestDisplay">Best: --</span>
-</div>
+  <h1>Samuel's Slide Puzzle Game</h1>
 
-<audio id="moveSound" src="move.mp3"></audio>
-<audio id="winSound" src="win.mp3"></audio>
+  <div id="controls">
+    <label for="levelSelect">Choose Level:</label>
+    <select id="levelSelect" onchange="changeLevel()">
+      <option value="3">Easy (3×3)</option>
+      <option value="4">Medium (4×4)</option>
+      <option value="6">Hard (6×6)</option>
+    </select>
 
-<label for="levelSelect">Choose Level:</label>
-<select id="levelSelect" onchange="changeLevel()">
-  <option value="3">Easy (3×3)</option>
-  <option value="4">Medium (4×4)</option>
-  <option value="6">Hard (6×6)</option>
-</select>
+    <button onclick="shuffle()">Shuffle</button>
+    <button onclick="init(gridSize)">Reset</button>
+    <button onclick="undoMove()">Undo</button>
+    <button onclick="toggleDarkMode()">Dark Mode</button>
+    <button onclick="shareScore()">Share Score</button>
+  </div>
 
-<button onclick="shuffle()">Shuffle</button>
-<button onclick="init(gridSize)">Reset</button>
-<button onclick="shareScore()">Share Score</button>
+  <div id="stats">
+    <span id="moveDisplay">Move: 0</span> |
+    <span id="timerDisplay">Time: 0s</span> |
+    <span id="bestDisplay">Best: --</span>
+  </div>
 
-<div id="scoreHistory"></div>
+  <div id="puzzle"></div>
 
+  <div id="scoreHistory"></div>
 
- <script src="script.js"></script>
+  <audio id="moveSound" src="Move.mp3"></audio>
+  <audio id="winSound" src="Win.mp3"></audio>
+
+  <script src="script.js"></script>
 </body>
-</html> 
+</html>
