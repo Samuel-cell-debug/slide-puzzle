@@ -1,0 +1,77 @@
+/* 🌐 Base Styles */
+body {
+    font-family: sans-serif;
+    text-align: center;
+    background: #f9f9f9;
+    margin: 20px;
+}
+
+/* 🧩 Puzzle Grid */
+#puzzle {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    margin: 20px auto;
+    width: 315px;
+}
+
+/* 🔷 Puzzle Tiles */
+.title {
+    background-color: #3498db;
+    color: white;
+    font-size: 32px;
+    line-height: 100px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    outline: none;
+}
+
+/* 🖱️ Hover & Focus Effects */
+.title:hover {
+    background-color: #2980b9;
+}
+.title:focus {
+    box-shadow: 0 0 0 3px #3498db;
+}
+
+/* ⬜ Empty Tile */
+.empty {
+    background-color: #ecf0f1;
+    cursor: default;
+}
+
+/* 🎞️ Slide Animations */
+.title.slide-left  { transform: translateX(-105px); }
+.title.slide-right { transform: translateX(105px); }
+.title.slide-up    { transform: translateY(-105px); }
+.title.slide-down  { transform: translateY(105px); }
+
+/* ✅ Solved Puzzle Animation */
+#puzzle.solved .title {
+    background-color: #2ecc71;
+    animation: pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from { transform: scale(1); }
+    to   { transform: scale(1.05); }
+}
+
+/* 📱 Responsive Design */
+@media (max-width: 500px) {
+    #puzzle {
+        grid-template-columns: repeat(3, 80px);
+        grid-template-rows: repeat(3, 80px);
+        width: 255px;
+    }
+    .title {
+        font-size: 24px;
+        line-height: 80px;
+    }
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8" />
+ <title>3x3 Slide Puzzle </title>
+ <link rel="stylesheet" href="style.css" />
+ <link rel="icon" href="favicon.ico" />
+</head>
+<body>
+ <h1>3x3 Slide Puzzle</h1>
+ 
+ <div id="stats">
+  <span id="moveDisplay">move: 0</span> |
+  <span id="timerDisplay">time: 0s</span>
+ </div>
+ 
+ <div id="puzzle"></div>
+ 
+ <div id="stats">
+  <span id="moveDisplay">Move: 0</span> |
+  <span id="timerDisplay">Time: 0s</span> |
+  <span id="bestDisplay">Best: --</span>
+</div>
+
+<audio id="moveSound" src="move.mp3"></audio>
+<audio id="winSound" src="win.mp3"></audio>
+
+<button onclick="shuffle()">Shuffle</button>
+<button onclick="init()">Reset</button>
+ 
+ <script src="script.js"></script>
+</body>
+</html> 
