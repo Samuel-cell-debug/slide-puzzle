@@ -1,85 +1,103 @@
-/* 🌐 Base Styles */
 body {
-    font-family: sans-serif;
-    text-align: center;
-    background: #f9f9f9;
-    margin: 20px;
+  font-family: sans-serif;
+  text-align: center;
+  background: #f9f9f9;
+  margin: 20px;
+  transition: background 0.3s, color 0.3s;
 }
 
-/* 🧩 Puzzle Grid */
+#controls {
+  margin-bottom: 15px;
+}
+
+#controls select,
+#controls button {
+  padding: 6px 12px;
+  margin: 5px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+#stats {
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
 #puzzle {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 5px;
-    margin: 20px auto;
-    width: 315px;
+  display: grid;
+  gap: 5px;
+  margin: 20px auto;
+  justify-content: center;
 }
 
-/* 🔷 Puzzle Tiles */
 .title {
-    background-color: #3498db;
-    color: white;
-    font-size: 32px;
-    line-height: 100px;
-    text-align: center;
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-    transition: transform 0.2s ease-in-out, background-color 0.2s ease;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-    outline: none;
+  background-color: #3498db;
+  color: white;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  outline: none;
 }
 
-/* 🖱️ Hover & Focus Effects */
 .title:hover {
-    background-color: #2980b9;
+  background-color: #2980b9;
 }
+
 .title:focus {
-    box-shadow: 0 0 0 3px #3498db;
+  box-shadow: 0 0 0 3px #3498db;
 }
 
-/* ⬜ Empty Tile */
 .empty {
-    background-color: #ecf0f1;
-    cursor: default;
+  background-color: #ecf0f1;
+  cursor: default;
 }
 
-/* 🎞️ Slide Animations */
 .title.slide-left  { transform: translateX(-105px); }
 .title.slide-right { transform: translateX(105px); }
 .title.slide-up    { transform: translateY(-105px); }
 .title.slide-down  { transform: translateY(105px); }
 
-/* ✅ Solved Puzzle Animation */
+.title.shuffle {
+  animation: shuffleFlash 0.3s ease-in-out;
+}
+
+@keyframes shuffleFlash {
+  0%   { transform: scale(1); background-color: #f1c40f; }
+  50%  { transform: scale(1.1); background-color: #e67e22; }
+  100% { transform: scale(1); background-color: #3498db; }
+}
+
 #puzzle.solved .title {
-    background-color: #2ecc71;
-    animation: pulse 0.5s ease-in-out infinite alternate;
+  background-color: #2ecc71;
+  animation: pulse 0.5s ease-in-out infinite alternate;
 }
 
 @keyframes pulse {
-    from { transform: scale(1); }
-    to   { transform: scale(1.05); }
+  from { transform: scale(1); }
+  to   { transform: scale(1.05); }
 }
 
-/* 📱 Responsive Design */
-@media (max-width: 500px) {
-    #puzzle {
-        grid-template-columns: repeat(3, 80px);
-        grid-template-rows: repeat(3, 80px);
-        width: 255px;
-    }
-    .title {
-        font-size: 24px;
-        line-height: 80px;
-    }
+body.dark-mode {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
 }
 
-#levelSelect {
-    padding: 5px 10px;
-    font-size: 16px;
-    margin: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+.dark-mode .title {
+  background-color: #444;
+  color: #fff;
+}
+
+.dark-mode .empty {
+  background-color: #666;
+}
+
+#scoreHistory {
+  margin-top: 20px;
+  font-size: 16px;
 }
