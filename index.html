@@ -25,9 +25,13 @@
 <audio id="moveSound" src="move.mp3"></audio>
 <audio id="winSound" src="win.mp3"></audio>
 
-<button onclick="init(3)">Easy (3×3)</button>
-<button onclick="init(4)">Medium (4×4)</button>
-<button onclick="init(6)">Hard (6×6)</button>
+<label for="levelSelect">Choose Level:</label>
+<select id="levelSelect" onchange="changeLevel()">
+  <option value="3">Easy (3×3)</option>
+  <option value="4">Medium (4×4)</option>
+  <option value="6">Hard (6×6)</option>
+</select>
+
 <button onclick="shuffle()">Shuffle</button>
 <button onclick="init(gridSize)">Reset</button>
 
