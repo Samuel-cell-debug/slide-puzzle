@@ -6,103 +6,28 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
-#splashScreen {
-  text-align: center;
-  padding: 50px;
-  background: #ecf0f1;
-  border-radius: 10px;
-  max-width: 500px;
-  margin: 50px auto;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.page {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  display: none;
 }
 
-#splashScreen h1 {
-  font-size: 32px;
-  margin-bottom: 10px;
+.page.active {
+  display: block;
+  opacity: 1;
 }
 
-#splashScreen button {
-  padding: 10px 20px;
-  font-size: 18px;
-  background-color: #3498db;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-#splashScreen button:hover {
-  background-color: #2980b9;
-}
-
-#toggleSettings {
+button, select {
   padding: 8px 16px;
-  font-size: 16px;
-  margin: 10px auto;
-  display: block;
-  background-color: #2ecc71;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-#toggleSettings:hover {
-  background-color: #27ae60;
-}
-
-#settingsPanel {
-  background: #fff;
-  padding: 15px;
-  margin: 20px auto;
-  max-width: 400px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  text-align: left;
-}
-
-#settingsPanel h3 {
-  margin-bottom: 10px;
-  font-size: 20px;
-  color: #333;
-}
-
-#settingsPanel label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-#settingsPanel select,
-#settingsPanel input[type="file"],
-#settingsPanel button {
-  width: 100%;
-  padding: 8px;
-  margin-top: 5px;
+  margin: 10px;
   font-size: 16px;
   border-radius: 5px;
   border: 1px solid #ccc;
-}
-
-#settingsPanel button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  margin-top: 15px;
   cursor: pointer;
-}
-
-#settingsPanel button:hover {
-  background-color: #2980b9;
 }
 
 #controls button {
-  padding: 6px 12px;
   margin: 5px;
-  font-size: 16px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  cursor: pointer;
 }
 
 #stats {
@@ -130,91 +55,78 @@ body {
   outline: none;
 }
 
-.title:hover {
-  background-color: #2980b9;
-}
-
 .empty {
   background-color: #ecf0f1;
   cursor: default;
-}
-
-.title.slide-left  { transform: translateX(-105px); }
-.title.slide-right { transform: translateX(105px); }
-.title.slide-up    { transform: translateY(-105px); }
-.title.slide-down  { transform: translateY(105px); }
-
-.title.shuffle {
-  animation: shuffleFlash 0.3s ease-in-out;
-}
-
-@keyframes shuffleFlash {
-  0%   { transform: scale(1); background-color: #f1c40f; }
-  50%  { transform: scale(1.1); background-color: #e67e22; }
-  100% { transform: scale(1); background-color: #3498db; }
-}
-
-#puzzle.solved .title {
-  background-color: #2ecc71;
-  animation: pulse 0.5s ease-in-out infinite alternate;
-}
-
-@keyframes pulse {
-  from { transform: scale(1); }
-  to   { transform: scale(1.05); }
 }
 
 .locked {
   background-color: #7f8c8d !important;
   cursor: not-allowed;
 }
+
 .rotatable {
   border: 2px dashed #e67e22;
 }
+
 .rotate {
   animation: spin 0.3s ease-in-out;
 }
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
+
 .bomb {
   background-color: #e74c3c !important;
   color: #fff;
   font-weight: bold;
 }
 
-#scoreHistory {
-  margin-top: 20px;
-  font-size: 16px;
-}
-
 .dark-mode {
   background-color: #1e1e1e;
   color: #f0f0f0;
 }
+
 .dark-mode .title {
   background-color: #444;
   color: #fff;
 }
+
 .dark-mode .empty {
   background-color: #666;
 }
-.dark-mode #settingsPanel {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+
+#tutorialOverlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  text-align: center;
+  padding: 50px;
+  z-index: 999;
 }
-.dark-mode #settingsPanel select,
-.dark-mode #settingsPanel input,
-.dark-mode #settingsPanel button {
-  background-color: #34495e;
-  color: #ecf0f1;
-  border: 1px solid #555;
-}
-.dark-mode #toggleSettings {
-  background-color: #16a085;
-}
-.dark-mode #splashScreen {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+
+@media (max-width: 600px) {
+  #settingsPanel, #controls, #stats {
+    width: 90%;
+    margin: auto;
+    font-size: 16px;
+  }
+
+  .title {
+    font-size: 14px !important;
+    line-height: 40px !important;
+  }
+
+  #puzzle {
+    gap: 3px;
+  }
+
+  button, select {
+    font-size: 16px;
+    padding: 8px;
+  }
 }
