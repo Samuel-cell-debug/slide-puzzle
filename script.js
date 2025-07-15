@@ -46,11 +46,9 @@ function quickStart() {
 
 function applySettings() {
     const level = parseInt(document.getElementById("levelSelect").value);
-    currentTheme = document.getElementById("themeSelect").value;
+    currentTheme = document.getElementById("themeSelect")?.value || currentTheme;
     soundEnabled = document.getElementById("soundToggle").value === "on";
     localStorage.setItem("soundEnabled", soundEnabled);
-    document.getElementById("customImage").style.display = currentTheme === "custom" ? "inline-block" : "none";
-
     showPage("gamePage");
     init(level);
     applyVariants();
@@ -63,6 +61,11 @@ function showTutorial() {
 
 function hideTutorial() {
     goToWelcome();
+}
+
+function showLastBest() {
+    let bestTime = localStorage.getItem("bestTime_3") || "--";
+    document.getElementById("lastBest").textContent = bestTime + "s";
 }
 
 // 🧩 Puzzle Initialization
@@ -103,26 +106,26 @@ function render() {
         tile.style.lineHeight = `${tileSize}px`;
         tile.style.fontSize = `${tileSize / 3}px`;
 
-        // Theme rendering
-        if (num !== null) {
-            if (currentTheme === "classic") {
-                tile.textContent = num;
-            } else if (currentTheme === "emoji") {
-                const emojis = ["😃", "🍕", "🐶", "🚀", "🎵", "🌍", "📚", "🏆", "💡", "🎨", "🧠", "🔥", "🍀", "🎯", "🕹️"];
-                tile.textContent = emojis[num - 1] || "❓";
-            } else if (currentTheme === "flag") {
-                const flags = ["🇬🇭", "🇳🇬", "🇺🇸", "🇬🇧", "🇿🇦", "🇰🇪", "🇨🇦", "🇩🇪", "🇯🇵", "🇧🇷", "🇫🇷", "🇮🇳", "🇨🇳", "🇪🇬", "🇲🇽"];
-                tile.textContent = flags[num - 1] || "🏳️";
-            } else if (currentTheme === "custom" && customImageURL) {
-                tile.textContent = "";
-                tile.style.backgroundImage = `url(${customImageURL})`;
-                tile.style.backgroundSize = "cover";
-                tile.style.color = "transparent";
-            }
-        } else {
+        // 🎨 Visual Themes
+        if (currentTheme === "custom" && customImageURL) {
+            const row = Math.floor(i / gridSize);
+            const col = i % gridSize;
+            const percentX = (col / (gridSize - 1)) * 100;
+            const percentY = (row / (gridSize - 1)) * 100;
+
+            tile.style.backgroundImage = `url(${customImageURL})`;
+            tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+            tile.style.backgroundPosition = `${percentX}% ${percentY}%`;
             tile.textContent = "";
-            tile.style.backgroundImage = "";
-            tile.style.color = "";
+            tile.style.color = "transparent";
+        } else if (currentTheme === "emoji") {
+            const emojiGrid = [
+                "😃", "🍕", "🐶", "🚀", "🎵", "🌍", "📚", "🏆", "💡",
+                "🎨", "🧠", "🔥", "🍀", "🎯", "🕹️", "🎉", "🌈", "📸"
+            ];
+            tile.textContent = emojiGrid[num - 1] || "❓";
+        } else {
+            tile.textContent = num;
         }
 
         if (lockedTiles.includes(i) && tiles[i] !== null) {
@@ -146,30 +149,9 @@ function render() {
             tile.onclick = () => move(i);
         }
 
-        let startX, startY;
-        tile.addEventListener("touchstart", e => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
-        tile.addEventListener("touchend", e => {
-            let endX = e.changedTouches[0].clientX;
-            let endY = e.changedTouches[0].clientY;
-            let dx = endX - startX;
-            let dy = endY - startY;
-
-            if (Math.abs(dx) > Math.abs(dy)) {
-                if (dx > 30) moveSwipe(i, "right");
-                else if (dx < -30) moveSwipe(i, "left");
-            } else {
-                if (dy > 30) moveSwipe(i, "down");
-                else if (dy < -30) moveSwipe(i, "up");
-            }
-        });
-
         puzzle.appendChild(tile);
     });
 }
-
 // 🔙 Undo
 function undoMove() {
     if (previousTiles.length === tiles.length) {
@@ -185,66 +167,11 @@ function toggleDarkMode() {
     localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
 }
 
-// 🎨 Theme Preview
-function changeTheme() {
-    currentTheme = document.getElementById("themeSelect").value;
-    document.getElementById("customImage").style.display = currentTheme === "custom" ? "inline-block" : "none";
-
-    const preview = document.getElementById("themePreview");
-    let sample = document.createElement("div");
-    sample.className = "title";
-    sample.style.width = "60px";
-    sample.style.height = "60px";
-    sample.style.lineHeight = "60px";
-    sample.style.margin = "auto";
-    sample.style.fontSize = "20px";
-
-    if (currentTheme === "classic") sample.textContent = "1";
-    else if (currentTheme === "emoji") sample.textContent = "😃";
-    else if (currentTheme === "flag") sample.textContent = "🇬🇭";
-    else if (currentTheme === "custom" && customImageURL) {
-        sample.textContent = "";
-        sample.style.backgroundImage = `url(${customImageURL})`;
-        sample.style.backgroundSize = "cover";
-    }
-
-    preview.innerHTML = "<strong>Theme Preview:</strong><br/>";
-    preview.appendChild(sample);
-}
-
-function loadCustomImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            customImageURL = e.target.result;
-            changeTheme();
-            render();
-        };
-        reader.readAsDataURL(file);
-    }
-}
-
 // 🔄 Rotate
 function rotateTile(i) {
     const tileDiv = puzzle.children[i];
     tileDiv.classList.add("rotate");
     setTimeout(() => tileDiv.classList.remove("rotate"), 300);
-}
-
-// 📱 Swipe
-function moveSwipe(i, direction) {
-    const empty = tiles.indexOf(null);
-    const rowI = Math.floor(i / gridSize), colI = i % gridSize;
-    const rowE = Math.floor(empty / gridSize), colE = empty % gridSize;
-
-    let valid = false;
-    if (direction === "left" && colI > 0 && i - 1 === empty) valid = true;
-    if (direction === "right" && colI < gridSize - 1 && i + 1 === empty) valid = true;
-    if (direction === "up" && rowI > 0 && i - gridSize === empty) valid = true;
-    if (direction === "down" && rowI < gridSize - 1 && i + gridSize === empty) valid = true;
-
-    if (valid) move(i);
 }
 
 // 🧠 Move
@@ -258,22 +185,11 @@ function move(i) {
 
     const isAdjacent = Math.abs(rowI - rowE) + Math.abs(colI - colE) === 1;
     if (isAdjacent) {
-        const tileDivs = puzzle.children;
-        const direction =
-            rowI === rowE
-                ? (colI < colE ? "slide-right" : "slide-left")
-                : (rowI < rowE ? "slide-down" : "slide-up");
-
-        tileDivs[i].classList.add(direction);
         if (soundEnabled) document.getElementById("moveSound").play();
-
-        setTimeout(() => {
-            tileDivs[i].classList.remove(direction);
-            [tiles[i], tiles[empty]] = [tiles[empty], tiles[i]];
-            moveCount++;
-            render();
-            checkWin();
-        }, 200);
+        [tiles[i], tiles[empty]] = [tiles[empty], tiles[i]];
+        moveCount++;
+        render();
+        checkWin();
     }
 }
 
@@ -348,11 +264,6 @@ function displayScoreHistory(level) {
     scoreHistory.innerHTML = html;
 }
 
-function showLastBest() {
-    let bestTime = localStorage.getItem("bestTime_3") || "--";
-    document.getElementById("lastBest").textContent = bestTime + "s";
-}
-
 // 🎯 Challenge Mode
 function applyVariants() {
     const mode = document.getElementById("variantSelect")?.value || "none";
@@ -415,4 +326,91 @@ function toggleSound() {
 function shareScore() {
     const message = `I just solved a ${gridSize}×${gridSize} slide puzzle in ${moveCount} moves and ${seconds} seconds! 🎉`;
     if (navigator.share) {
-        navigator.share
+        navigator.share({
+            title: "Slide Puzzle Challenge",
+            text: message,
+            url: window.location.href
+        });
+    } else {
+        alert("Sharing not supported. Copy and share manually:\n\n" + message);
+    }
+}
+
+// 🎨 Visual Challenge Mode
+function selectVisualMode() {
+    const mode = document.getElementById("visualMode").value;
+
+    document.getElementById("flagSelect").style.display = "none";
+    document.getElementById("customImage").style.display = "none";
+    document.getElementById("imagePreview").style.display = "none";
+    document.getElementById("flagFact").textContent = "";
+
+    if (mode === "emoji") {
+        currentTheme = "emoji";
+        customImageURL = "";
+        init(gridSize);
+    } else if (mode === "flag") {
+        document.getElementById("flagSelect").style.display = "inline-block";
+    } else if (mode === "image") {
+        document.getElementById("customImage").style.display = "inline-block";
+    }
+}
+
+// 🌍 Flag Loader
+function loadFlagImage() {
+    const flag = document.getElementById("flagSelect").value;
+    if (!flag) return;
+
+    const flagMap = {
+        ghana: "flags/ghana.png",
+        nigeria: "flags/nigeria.png",
+        kenya: "flags/kenya.png",
+        south_africa: "flags/south_africa.png",
+        usa: "flags/usa.png"
+    };
+
+    const factMap = {
+        ghana: "🇬🇭 Ghana's flag symbolizes freedom and justice.",
+        nigeria: "🇳🇬 Nigeria's green represents agriculture.",
+        kenya: "🇰🇪 Kenya's shield stands for defense of freedom.",
+        south_africa: "🇿🇦 South Africa's colors represent unity.",
+        usa: "🇺🇸 USA's stars represent the 50 states."
+    };
+
+    customImageURL = flagMap[flag];
+    currentTheme = "custom";
+    document.getElementById("flagFact").textContent = factMap[flag];
+    showImagePreview();
+    init(gridSize);
+}
+
+// 🖼️ Image Upload
+function loadCustomImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            customImageURL = e.target.result;
+            currentTheme = "custom";
+            showImagePreview();
+            init(gridSize);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// 👁️ Preview
+function showImagePreview() {
+    const preview = document.getElementById("imagePreview");
+    if (customImageURL) {
+        preview.innerHTML = `<img src="${customImageURL}" alt="Preview" />`;
+        preview.style.display = "block";
+    }
+}
+
+// 🚀 Start Game
+if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark-mode");
+}
+soundEnabled = localStorage.getItem("soundEnabled") !== "false";
+showLastBest();
