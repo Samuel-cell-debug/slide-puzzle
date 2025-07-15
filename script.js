@@ -107,44 +107,54 @@ function render() {
         tile.style.fontSize = `${tileSize / 3}px`;
 
         // 🎨 Visual Themes
-        if (currentTheme === "custom" && customImageURL) {
-            const row = Math.floor(i / gridSize);
-            const col = i % gridSize;
-            const percentX = (col / (gridSize - 1)) * 100;
-            const percentY = (row / (gridSize - 1)) * 100;
+        if (num !== null) {
+            if (currentTheme === "custom" && customImageURL) {
+                const row = Math.floor((num - 1) / gridSize);
+                const col = (num - 1) % gridSize;
+                const percentX = (col / (gridSize - 1)) * 100;
+                const percentY = (row / (gridSize - 1)) * 100;
 
-            tile.style.backgroundImage = `url(${customImageURL})`;
-            tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
-            tile.style.backgroundPosition = `${percentX}% ${percentY}%`;
-            tile.textContent = "";
-            tile.style.color = "transparent";
-        } else if (currentTheme === "emoji") {
-            const emojiGrid = [
-                "😃", "🍕", "🐶", "🚀", "🎵", "🌍", "📚", "🏆", "💡",
-                "🎨", "🧠", "🔥", "🍀", "🎯", "🕹️", "🎉", "🌈", "📸"
-            ];
-            tile.textContent = emojiGrid[num - 1] || "❓";
+                tile.style.backgroundImage = `url(${customImageURL})`;
+                tile.style.backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
+                tile.style.backgroundPosition = `${percentX}% ${percentY}%`;
+                tile.textContent = "";
+                tile.style.color = "transparent";
+            } else if (currentTheme === "emoji") {
+                const emojiGrid = [
+                    "😃", "🍕", "🐶", "🚀", "🎵", "🌍", "📚", "🏆", "💡",
+                    "🎨", "🧠", "🔥", "🍀", "🎯", "🕹️", "🎉", "🌈", "📸"
+                ];
+                tile.textContent = emojiGrid[num - 1] || "❓";
+            } else {
+                tile.textContent = num;
+            }
         } else {
-            tile.textContent = num;
+            tile.textContent = "";
+            tile.style.backgroundImage = "";
+            tile.style.color = "";
         }
 
+        // 🔒 Locked
         if (lockedTiles.includes(i) && tiles[i] !== null) {
             tile.classList.add("locked");
             tile.innerHTML += " 🔒";
             tile.onclick = null;
         }
 
+        // 🔄 Rotatable
         if (rotatableTiles.includes(i) && tiles[i] !== null) {
             tile.classList.add("rotatable");
             tile.innerHTML += " 🔄";
             tile.onclick = () => rotateTile(i);
         }
 
+        // ⏱️ Bomb
         if (bombTiles.includes(i) && tiles[i] !== null) {
             tile.classList.add("bomb");
             tile.innerHTML += ` ⏱️${bombTimers[i]}`;
         }
 
+        // 🧠 Normal move
         if (!lockedTiles.includes(i) && !rotatableTiles.includes(i)) {
             tile.onclick = () => move(i);
         }
@@ -152,6 +162,7 @@ function render() {
         puzzle.appendChild(tile);
     });
 }
+
 // 🔙 Undo
 function undoMove() {
     if (previousTiles.length === tiles.length) {
