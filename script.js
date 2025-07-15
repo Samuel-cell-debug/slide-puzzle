@@ -20,6 +20,36 @@ let bombTiles = [];
 let bombTimers = {};
 window.bombInterval = null;
 
+let soundEnabled = true;
+
+// 🚀 Splash screen start
+function startGame() {
+    document.getElementById("splashScreen").style.display = "none";
+    document.getElementById("settingsContainer").style.display = "block";
+    document.getElementById("puzzle").style.display = "grid";
+    init();
+}
+
+// ⚙️ Toggle settings panel
+function toggleSettingsPanel() {
+    const panel = document.getElementById("settingsContainer");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+}
+
+// 🎛️ Apply settings
+function applySettings() {
+    const level = parseInt(document.getElementById("levelSelect").value);
+    currentTheme = document.getElementById("themeSelect").value;
+    const variant = document.getElementById("variantSelect").value;
+
+    document.getElementById("customImage").style.display = currentTheme === "custom" ? "inline-block" : "none";
+    document.getElementById("soundToggle").value = soundEnabled ? "on" : "off";
+
+    init(level);
+    applyVariants();
+    render();
+}
+
 // 🧩 Initialize puzzle
 function init(size = 3) {
     gridSize = size;
@@ -149,7 +179,27 @@ function toggleDarkMode() {
 function changeTheme() {
     currentTheme = document.getElementById("themeSelect").value;
     document.getElementById("customImage").style.display = currentTheme === "custom" ? "inline-block" : "none";
-    render();
+
+    const preview = document.getElementById("themePreview");
+    let sample = document.createElement("div");
+    sample.className = "title";
+    sample.style.width = "60px";
+    sample.style.height = "60px";
+    sample.style.lineHeight = "60px";
+    sample.style.margin = "auto";
+    sample.style.fontSize = "20px";
+
+    if (currentTheme === "classic") sample.textContent = "1";
+    else if (currentTheme === "emoji") sample.textContent = "😃";
+    else if (currentTheme === "flag") sample.textContent = "🇬🇭";
+    else if (currentTheme === "custom" && customImageURL) {
+        sample.textContent = "";
+        sample.style.backgroundImage = `url(${customImageURL})`;
+        sample.style.backgroundSize = "cover";
+    }
+
+    preview.innerHTML = "<strong>Theme Preview:</strong><br/>";
+    preview.appendChild(sample);
 }
 
 function loadCustomImage(event) {
@@ -158,6 +208,7 @@ function loadCustomImage(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             customImageURL = e.target.result;
+            changeTheme();
             render();
         };
         reader.readAsDataURL(file);
@@ -204,7 +255,7 @@ function move(i) {
                 : (rowI < rowE ? "slide-down" : "slide-up");
 
         tileDivs[i].classList.add(direction);
-        document.getElementById("moveSound").play();
+        if (soundEnabled) document.getElementById("moveSound").play();
 
         setTimeout(() => {
             tileDivs[i].classList.remove(direction);
@@ -254,7 +305,7 @@ function checkWin() {
     clearInterval(timer);
     clearInterval(window.bombInterval);
     puzzle.classList.add("solved");
-    document.getElementById("winSound").play();
+    if (soundEnabled) document.getElementById("winSound").play();
 
     let timeLimit = gridSize === 3 ? 60 : gridSize === 4 ? 120 : 180;
     let moveLimit = gridSize === 3 ? 50 : gridSize === 4 ? 100 : 150;
@@ -294,12 +345,6 @@ function displayScoreHistory(level) {
     });
     html += `</ul>`;
     scoreHistory.innerHTML = html;
-}
-
-// 🎛️ Level Selector
-function changeLevel() {
-    const level = parseInt(document.getElementById("levelSelect").value);
-    init(level);
 }
 
 // 🎯 Challenge Mode
@@ -353,6 +398,13 @@ function startBombCountdown() {
     }, 1000);
 }
 
+// 🔊 Sound Toggle
+function toggleSound() {
+    const value = document.getElementById("soundToggle").value;
+    soundEnabled = value === "on";
+    localStorage.setItem("soundEnabled", soundEnabled);
+}
+
 // 📤 Share Score
 function shareScore() {
     const message = `I just solved a ${gridSize}×${gridSize} slide puzzle in ${moveCount} moves and ${seconds} seconds! 🎉
@@ -370,7 +422,7 @@ Can you beat my score? Try it here: https://your-username.github.io/slide-puzzle
 }
 
 // 🚀 Start game
-init();
 if (localStorage.getItem("darkMode") === "true") {
     document.body.classList.add("dark-mode");
 }
+soundEnabled = localStorage.getItem("soundEnabled") !== "false";
