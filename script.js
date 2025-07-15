@@ -11,7 +11,16 @@ let timer;
 let seconds = 0;
 let gridSize = 3;
 
-// 🧩 Initialize puzzle with level
+let currentTheme = "classic";
+let customImageURL = "";
+
+let lockedTiles = [];
+let rotatableTiles = [];
+let bombTiles = [];
+let bombTimers = {};
+window.bombInterval = null;
+
+// 🧩 Initialize puzzle
 function init(size = 3) {
     gridSize = size;
     const total = gridSize * gridSize;
@@ -20,15 +29,17 @@ function init(size = 3) {
     moveCount = 0;
     seconds = 0;
     clearInterval(timer);
+    clearInterval(window.bombInterval);
     puzzle.classList.remove("solved");
+
+    applyVariants();
     render();
     displayScoreHistory(gridSize);
 }
 
-// 🎨 Render puzzle tiles
+// 🎨 Render puzzle
 function render() {
     puzzle.innerHTML = '';
-
     const tileSize = gridSize === 3 ? 100 : gridSize === 4 ? 80 : 60;
     puzzle.style.gridTemplateColumns = `repeat(${gridSize}, ${tileSize}px)`;
     puzzle.style.gridTemplateRows = `repeat(${gridSize}, ${tileSize}px)`;
@@ -43,16 +54,55 @@ function render() {
     tiles.forEach((num, i) => {
         let tile = document.createElement("div");
         tile.className = "title" + (num === null ? " empty" : "");
-        tile.textContent = num !== null ? num : "";
         tile.tabIndex = 0;
         tile.style.lineHeight = `${tileSize}px`;
         tile.style.fontSize = `${tileSize / 3}px`;
-        tile.onclick = () => move(i);
 
-        // 🎞️ Shuffle animation
-        if (moveCount === 0 && seconds === 0) {
-            tile.classList.add("shuffle");
-            setTimeout(() => tile.classList.remove("shuffle"), 300);
+        // 🎨 Theme rendering
+        if (num !== null) {
+            if (currentTheme === "classic") {
+                tile.textContent = num;
+            } else if (currentTheme === "emoji") {
+                const emojis = ["😃", "🍕", "🐶", "🚀", "🎵", "🌍", "📚", "🏆", "💡", "🎨", "🧠", "🔥", "🍀", "🎯", "🕹️"];
+                tile.textContent = emojis[num - 1] || "❓";
+            } else if (currentTheme === "flag") {
+                const flags = ["🇬🇭", "🇳🇬", "🇺🇸", "🇬🇧", "🇿🇦", "🇰🇪", "🇨🇦", "🇩🇪", "🇯🇵", "🇧🇷", "🇫🇷", "🇮🇳", "🇨🇳", "🇪🇬", "🇲🇽"];
+                tile.textContent = flags[num - 1] || "🏳️";
+            } else if (currentTheme === "custom" && customImageURL) {
+                tile.textContent = "";
+                tile.style.backgroundImage = `url(${customImageURL})`;
+                tile.style.backgroundSize = "cover";
+                tile.style.color = "transparent";
+            }
+        } else {
+            tile.textContent = "";
+            tile.style.backgroundImage = "";
+            tile.style.color = "";
+        }
+
+        // 🔒 Locked
+        if (lockedTiles.includes(i) && tiles[i] !== null) {
+            tile.classList.add("locked");
+            tile.innerHTML += " 🔒";
+            tile.onclick = null;
+        }
+
+        // 🔄 Rotatable
+        if (rotatableTiles.includes(i) && tiles[i] !== null) {
+            tile.classList.add("rotatable");
+            tile.innerHTML += " 🔄";
+            tile.onclick = () => rotateTile(i);
+        }
+
+        // ⏱️ Bomb
+        if (bombTiles.includes(i) && tiles[i] !== null) {
+            tile.classList.add("bomb");
+            tile.innerHTML += ` ⏱️${bombTimers[i]}`;
+        }
+
+        // 🧠 Normal move
+        if (!lockedTiles.includes(i) && !rotatableTiles.includes(i)) {
+            tile.onclick = () => move(i);
         }
 
         // 📱 Swipe gestures
@@ -80,7 +130,7 @@ function render() {
     });
 }
 
-// 🔙 Undo last move
+// 🔙 Undo
 function undoMove() {
     if (previousTiles.length === tiles.length) {
         tiles = [...previousTiles];
@@ -89,7 +139,39 @@ function undoMove() {
     }
 }
 
-// 📱 Swipe movement logic
+// 🌙 Dark Mode
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+}
+
+// 🎨 Theme
+function changeTheme() {
+    currentTheme = document.getElementById("themeSelect").value;
+    document.getElementById("customImage").style.display = currentTheme === "custom" ? "inline-block" : "none";
+    render();
+}
+
+function loadCustomImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            customImageURL = e.target.result;
+            render();
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+// 🔄 Rotate
+function rotateTile(i) {
+    const tileDiv = puzzle.children[i];
+    tileDiv.classList.add("rotate");
+    setTimeout(() => tileDiv.classList.remove("rotate"), 300);
+}
+
+// 📱 Swipe
 function moveSwipe(i, direction) {
     const empty = tiles.indexOf(null);
     const rowI = Math.floor(i / gridSize), colI = i % gridSize;
@@ -104,15 +186,9 @@ function moveSwipe(i, direction) {
     if (valid) move(i);
 }
 
-// 🌙 Dark mode toggle
-function toggleDarkMode() {
-    document.body.classList.toggle("dark-mode");
-    const isDark = document.body.classList.contains("dark-mode");
-    localStorage.setItem("darkMode", isDark ? "true" : "false");
-}
-
-// 🧠 Move tile if adjacent to empty
+// 🧠 Move
 function move(i) {
+    if (lockedTiles.includes(i)) return;
     previousTiles = [...tiles];
 
     const empty = tiles.indexOf(null);
@@ -140,7 +216,7 @@ function move(i) {
     }
 }
 
-// 🔀 Shuffle puzzle
+// 🔀 Shuffle
 function shuffle() {
     do {
         for (let i = tiles.length - 1; i > 0; i--) {
@@ -159,7 +235,7 @@ function shuffle() {
     render();
 }
 
-// ✅ Check if puzzle is solvable
+// ✅ Solvable
 function isSolvable() {
     let inv = 0;
     for (let i = 0; i < tiles.length - 1; i++) {
@@ -170,12 +246,13 @@ function isSolvable() {
     return inv % 2 === 0;
 }
 
-// 🏆 Check if puzzle is solved
+// 🏆 Win
 function checkWin() {
     for (let i = 0; i < tiles.length - 1; i++) {
         if (tiles[i] !== i + 1) return;
     }
     clearInterval(timer);
+    clearInterval(window.bombInterval);
     puzzle.classList.add("solved");
     document.getElementById("winSound").play();
 
@@ -225,6 +302,57 @@ function changeLevel() {
     init(level);
 }
 
+// 🎯 Challenge Mode
+function applyVariants() {
+    const mode = document.getElementById("variantSelect")?.value || "none";
+    const total = gridSize * gridSize;
+
+    lockedTiles = [];
+    rotatableTiles = [];
+    bombTiles = [];
+    bombTimers = {};
+
+    if (mode === "locked" || mode === "all") {
+        while (lockedTiles.length < 2) {
+            let i = Math.floor(Math.random() * (total - 1));
+            if (!lockedTiles.includes(i)) lockedTiles.push(i);
+        }
+    }
+    if (mode === "rotate" || mode === "all") {
+        while (rotatableTiles.length < 2) {
+            let i = Math.floor(Math.random() * (total - 1));
+            if (!rotatableTiles.includes(i) && !lockedTiles.includes(i)) rotatableTiles.push(i);
+        }
+    }
+    if (mode === "bomb" || mode === "all") {
+        while (bombTiles.length < 1) {
+            let i = Math.floor(Math.random() * (total - 1));
+            if (!lockedTiles.includes(i) && !rotatableTiles.includes(i)) {
+                bombTiles.push(i);
+                bombTimers[i] = 15;
+            }
+        }
+        startBombCountdown();
+    }
+}
+
+// ⏱️ Bomb Countdown
+function startBombCountdown() {
+    clearInterval(window.bombInterval);
+    window.bombInterval = setInterval(() => {
+        bombTiles.forEach(i => {
+            if (bombTimers[i] > 0) {
+                bombTimers[i]--;
+                if (bombTimers[i] === 0) {
+                    if (!lockedTiles.includes(i)) lockedTiles.push(i);
+                    alert("💣 A bomb tile has locked!");
+                    render();
+                }
+            }
+        });
+    }, 1000);
+}
+
 // 📤 Share Score
 function shareScore() {
     const message = `I just solved a ${gridSize}×${gridSize} slide puzzle in ${moveCount} moves and ${seconds} seconds! 🎉
@@ -243,8 +371,6 @@ Can you beat my score? Try it here: https://your-username.github.io/slide-puzzle
 
 // 🚀 Start game
 init();
-
-// 🌙 Apply saved dark mode
 if (localStorage.getItem("darkMode") === "true") {
     document.body.classList.add("dark-mode");
 }
