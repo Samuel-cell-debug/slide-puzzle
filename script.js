@@ -13,6 +13,7 @@ let gridSize = 3;
 
 let currentTheme = "classic";
 let customImageURL = "";
+let soundEnabled = true;
 
 let lockedTiles = [];
 let rotatableTiles = [];
@@ -20,37 +21,51 @@ let bombTiles = [];
 let bombTimers = {};
 window.bombInterval = null;
 
-let soundEnabled = true;
-
-// 🚀 Splash screen start
-function startGame() {
-    document.getElementById("splashScreen").style.display = "none";
-    document.getElementById("settingsContainer").style.display = "block";
-    document.getElementById("puzzle").style.display = "grid";
-    init();
+// 🌟 Page Navigation
+function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 }
 
-// ⚙️ Toggle settings panel
-function toggleSettingsPanel() {
-    const panel = document.getElementById("settingsContainer");
-    panel.style.display = panel.style.display === "none" ? "block" : "none";
+function goToWelcome() {
+    showPage("welcomePage");
+    showLastBest();
 }
 
-// 🎛️ Apply settings
+function goToSettings() {
+    showPage("settingsPage");
+}
+
+function quickStart() {
+    gridSize = 3;
+    currentTheme = "classic";
+    soundEnabled = true;
+    showPage("gamePage");
+    init(gridSize);
+}
+
 function applySettings() {
     const level = parseInt(document.getElementById("levelSelect").value);
     currentTheme = document.getElementById("themeSelect").value;
-    const variant = document.getElementById("variantSelect").value;
-
+    soundEnabled = document.getElementById("soundToggle").value === "on";
+    localStorage.setItem("soundEnabled", soundEnabled);
     document.getElementById("customImage").style.display = currentTheme === "custom" ? "inline-block" : "none";
-    document.getElementById("soundToggle").value = soundEnabled ? "on" : "off";
 
+    showPage("gamePage");
     init(level);
     applyVariants();
     render();
 }
 
-// 🧩 Initialize puzzle
+function showTutorial() {
+    showPage("tutorialOverlay");
+}
+
+function hideTutorial() {
+    goToWelcome();
+}
+
+// 🧩 Puzzle Initialization
 function init(size = 3) {
     gridSize = size;
     const total = gridSize * gridSize;
@@ -67,7 +82,7 @@ function init(size = 3) {
     displayScoreHistory(gridSize);
 }
 
-// 🎨 Render puzzle
+// 🎨 Render Puzzle
 function render() {
     puzzle.innerHTML = '';
     const tileSize = gridSize === 3 ? 100 : gridSize === 4 ? 80 : 60;
@@ -88,7 +103,7 @@ function render() {
         tile.style.lineHeight = `${tileSize}px`;
         tile.style.fontSize = `${tileSize / 3}px`;
 
-        // 🎨 Theme rendering
+        // Theme rendering
         if (num !== null) {
             if (currentTheme === "classic") {
                 tile.textContent = num;
@@ -110,32 +125,27 @@ function render() {
             tile.style.color = "";
         }
 
-        // 🔒 Locked
         if (lockedTiles.includes(i) && tiles[i] !== null) {
             tile.classList.add("locked");
             tile.innerHTML += " 🔒";
             tile.onclick = null;
         }
 
-        // 🔄 Rotatable
         if (rotatableTiles.includes(i) && tiles[i] !== null) {
             tile.classList.add("rotatable");
             tile.innerHTML += " 🔄";
             tile.onclick = () => rotateTile(i);
         }
 
-        // ⏱️ Bomb
         if (bombTiles.includes(i) && tiles[i] !== null) {
             tile.classList.add("bomb");
             tile.innerHTML += ` ⏱️${bombTimers[i]}`;
         }
 
-        // 🧠 Normal move
         if (!lockedTiles.includes(i) && !rotatableTiles.includes(i)) {
             tile.onclick = () => move(i);
         }
 
-        // 📱 Swipe gestures
         let startX, startY;
         tile.addEventListener("touchstart", e => {
             startX = e.touches[0].clientX;
@@ -175,7 +185,7 @@ function toggleDarkMode() {
     localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
 }
 
-// 🎨 Theme
+// 🎨 Theme Preview
 function changeTheme() {
     currentTheme = document.getElementById("themeSelect").value;
     document.getElementById("customImage").style.display = currentTheme === "custom" ? "inline-block" : "none";
@@ -307,23 +317,14 @@ function checkWin() {
     puzzle.classList.add("solved");
     if (soundEnabled) document.getElementById("winSound").play();
 
-    let timeLimit = gridSize === 3 ? 60 : gridSize === 4 ? 120 : 180;
-    let moveLimit = gridSize === 3 ? 50 : gridSize === 4 ? 100 : 150;
-    let challengePassed = seconds <= timeLimit && moveCount <= moveLimit;
-
-    let message = challengePassed
-        ? `🎉 You beat the challenge! ${moveCount} moves in ${seconds} seconds!`
-        : `✅ Puzzle solved, but challenge not met. ${moveCount} moves in ${seconds} seconds.`;
-
     let bestKey = `bestTime_${gridSize}`;
     let bestTime = localStorage.getItem(bestKey);
     if (!bestTime || seconds < bestTime) {
         localStorage.setItem(bestKey, seconds);
-        message += `\n🏅 New best time for ${gridSize}×${gridSize}: ${seconds} seconds!`;
     }
 
     updateScoreHistory(gridSize, seconds);
-    setTimeout(() => alert(message), 100);
+    setTimeout(() => alert(`🎉 Puzzle solved in ${moveCount} moves and ${seconds} seconds!`), 100);
 }
 
 // 📜 Score History
@@ -345,6 +346,11 @@ function displayScoreHistory(level) {
     });
     html += `</ul>`;
     scoreHistory.innerHTML = html;
+}
+
+function showLastBest() {
+    let bestTime = localStorage.getItem("bestTime_3") || "--";
+    document.getElementById("lastBest").textContent = bestTime + "s";
 }
 
 // 🎯 Challenge Mode
@@ -407,22 +413,6 @@ function toggleSound() {
 
 // 📤 Share Score
 function shareScore() {
-    const message = `I just solved a ${gridSize}×${gridSize} slide puzzle in ${moveCount} moves and ${seconds} seconds! 🎉
-Can you beat my score? Try it here: https://your-username.github.io/slide-puzzle`;
-
+    const message = `I just solved a ${gridSize}×${gridSize} slide puzzle in ${moveCount} moves and ${seconds} seconds! 🎉`;
     if (navigator.share) {
-        navigator.share({
-            title: "Slide Puzzle Challenge",
-            text: message,
-            url: "https://your-username.github.io/slide-puzzle"
-        });
-    } else {
-        alert("Sharing not supported. Copy and share manually:\n\n" + message);
-    }
-}
-
-// 🚀 Start game
-if (localStorage.getItem("darkMode") === "true") {
-    document.body.classList.add("dark-mode");
-}
-soundEnabled = localStorage.getItem("soundEnabled") !== "false";
+        navigator.share
