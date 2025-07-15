@@ -35,6 +35,8 @@
     <option value="image">Custom Image</option>
   </select>
 
+  <div id="imageWarning" style="color: red; display: none; margin-top: 10px;"></div>
+  
   <label for="flagSelect">Choose a Flag:</label>
   <select id="flagSelect" onchange="loadFlagImage()" style="display:none;">
     <option value="">-- Select --</option>
@@ -68,6 +70,7 @@
   </select>
 
   <button onclick="applySettings()">Start Game</button>
+  <button onclick="resetToDefault()">Reset to Default</button>
   <button onclick="goToWelcome()">Back</button>
 </div>
 
