@@ -183,7 +183,7 @@ Can you beat my score? Try it here: https://your-username.github.io/slide-puzzle
         navigator.share({
             title: "Slide Puzzle Challenge",
             text: message,
-            url: "https://your-username.github.io/slide-puzzle"
+            url: "https://samuel-cell-debug.github.io/slide-puzzle"
         });
     } else {
         alert("Sharing not supported. Copy and share manually:\n\n" + message);
