@@ -10,12 +10,23 @@
   <h1>Samuel's Slide Puzzle Game</h1>
 
   <div id="controls">
-    <label for="levelSelect">Choose Level:</label>
-    <select id="levelSelect" onchange="changeLevel()">
-      <option value="3">Easy (3×3)</option>
-      <option value="4">Medium (4×4)</option>
-      <option value="6">Hard (6×6)</option>
-    </select>
+   <label for="themeSelect">Tile Theme:</label>
+<select id="themeSelect" onchange="changeTheme()">
+  <option value="classic">Classic</option>
+  <option value="emoji">Emoji</option>
+  <option value="flag">Flag</option>
+  <option value="custom">Custom Image</option>
+</select>
+<input type="file" id="customImage" accept="image/*" style="display:none" onchange="loadCustomImage(event)" />
+
+<label for="variantSelect">Challenge Mode:</label>
+<select id="variantSelect" onchange="applyVariants()">
+  <option value="none">None</option>
+  <option value="locked">Locked Tiles</option>
+  <option value="rotate">Rotating Tiles</option>
+  <option value="bomb">Time Bombs</option>
+  <option value="all">All Variants</option>
+</select>
 
     <button onclick="shuffle()">Shuffle</button>
     <button onclick="init(gridSize)">Reset</button>
