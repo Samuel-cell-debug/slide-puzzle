@@ -1,5 +1,7 @@
 # 🎮 3x3 Slide Puzzle Game
 
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 A fun and interactive 3×3 sliding puzzle built with HTML, CSS, and JavaScript. Challenge yourself to solve the puzzle in under 60 seconds and 50 moves!
 
 ---
