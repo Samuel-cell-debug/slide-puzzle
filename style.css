@@ -75,3 +75,11 @@ body {
         line-height: 80px;
     }
 }
+
+#levelSelect {
+    padding: 5px 10px;
+    font-size: 16px;
+    margin: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
