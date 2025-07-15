@@ -30,8 +30,6 @@
   <label for="themeSelect">Theme:</label>
   <select id="themeSelect" onchange="changeTheme()">
     <option value="classic">Classic</option>
-    <option value="emoji">Emoji</option>
-    <option value="flag">Flag</option>
     <option value="custom">Custom Image</option>
   </select>
   <input type="file" id="customImage" accept="image/*" style="display:none" onchange="loadCustomImage(event)" />
@@ -62,7 +60,7 @@
     <button onclick="shuffle()">Shuffle</button>
     <button onclick="undoMove()">Undo</button>
     <button onclick="init(gridSize)">Reset</button>
-    <button onclick="toggleDarkMode()">Dark Mode</button>
+    <button onclick="toggleDarkMode()">Dark/Light Mode</button>
     <button onclick="shareScore()">Share Score</button>
     <button onclick="goToWelcome()">Back</button>
   </div>
