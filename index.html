@@ -27,15 +27,30 @@
     <option value="6">Hard (6×6)</option>
   </select>
 
-  <label for="themeSelect">Theme:</label>
-  <select id="themeSelect" onchange="changeTheme()">
-    <option value="classic">Classic</option>
-    <option value="emoji">Emoji</option>
-    <option value="flag">Flag</option>
-    <option value="custom">Custom Image</option>
+  <label for="visualMode">Visual Challenge:</label>
+  <select id="visualMode" onchange="selectVisualMode()">
+    <option value="">-- Select Mode --</option>
+    <option value="emoji">Emoji Mosaic</option>
+    <option value="flag">Flag Puzzle</option>
+    <option value="image">Custom Image</option>
   </select>
-  <input type="file" id="customImage" accept="image/*" style="display:none" onchange="loadCustomImage(event)" />
-  <div id="themePreview"></div>
+
+  <label for="flagSelect">Choose a Flag:</label>
+  <select id="flagSelect" onchange="loadFlagImage()" style="display:none;">
+    <option value="">-- Select --</option>
+    <option value="ghana">🇬🇭 Ghana</option>
+    <option value="nigeria">🇳🇬 Nigeria</option>
+    <option value="kenya">🇰🇪 Kenya</option>
+    <option value="south_africa">🇿🇦 South Africa</option>
+    <option value="usa">🇺🇸 USA</option>
+  </select>
+
+  <label for="customImage">Upload Image:</label>
+  <input type="file" id="customImage" accept="image/*" onchange="loadCustomImage(event)" style="display:none;" />
+
+  <button onclick="showImagePreview()">Preview</button>
+  <div id="imagePreview" style="display:none;"></div>
+  <div id="flagFact" style="margin-top:10px;"></div>
 
   <label for="variantSelect">Challenge Mode:</label>
   <select id="variantSelect">
