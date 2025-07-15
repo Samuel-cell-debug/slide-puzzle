@@ -101,3 +101,29 @@ body.dark-mode {
   margin-top: 20px;
   font-size: 16px;
 }
+
+/* === Puzzle Variant Styles === */
+.locked {
+  background-color: #7f8c8d !important;
+  cursor: not-allowed;
+}
+.dark-mode .locked {
+  background-color: #555 !important;
+}
+
+.rotatable {
+  border: 2px dashed #e67e22;
+}
+.rotate {
+  animation: spin 0.3s ease-in-out;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.bomb {
+  background-color: #e74c3c !important;
+  color: #fff;
+  font-weight: bold;
+}
