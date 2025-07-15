@@ -99,18 +99,19 @@ function render() {
     let best = localStorage.getItem(bestKey);
     bestDisplay.textContent = "Best: " + (best ? best + "s" : "--");
 
-    tiles.forEach((num, i) => {
+    tiles.forEach((value, i) => {
         let tile = document.createElement("div");
-        tile.className = "title" + (num === null ? " empty" : "");
+        tile.className = "title" + (value === null ? " empty" : "");
         tile.tabIndex = 0;
+        tile.style.width = `${tileSize}px`;
+        tile.style.height = `${tileSize}px`;
         tile.style.lineHeight = `${tileSize}px`;
         tile.style.fontSize = `${tileSize / 3}px`;
 
-        // 🎨 Visual Themes
-        if (num !== null) {
+        if (value !== null) {
             if (currentTheme === "custom" && customImageURL) {
-                const row = Math.floor((num - 1) / gridSize);
-                const col = (num - 1) % gridSize;
+                const row = Math.floor((value - 1) / gridSize);
+                const col = (value - 1) % gridSize;
                 const percentX = (col / (gridSize - 1)) * 100;
                 const percentY = (row / (gridSize - 1)) * 100;
 
@@ -124,9 +125,9 @@ function render() {
                     "😃", "🍕", "🐶", "🚀", "🎵", "🌍", "📚", "🏆", "💡",
                     "🎨", "🧠", "🔥", "🍀", "🎯", "🕹️", "🎉", "🌈", "📸"
                 ];
-                tile.textContent = emojiGrid[num - 1] || "❓";
+                tile.textContent = emojiGrid[value - 1] || "❓";
             } else {
-                tile.textContent = num;
+                tile.textContent = value;
             }
         } else {
             tile.textContent = "";
@@ -134,27 +135,23 @@ function render() {
             tile.style.color = "";
         }
 
-        // 🔒 Locked
-        if (lockedTiles.includes(i) && tiles[i] !== null) {
+        if (lockedTiles.includes(i) && value !== null) {
             tile.classList.add("locked");
             tile.innerHTML += " 🔒";
             tile.onclick = null;
         }
 
-        // 🔄 Rotatable
-        if (rotatableTiles.includes(i) && tiles[i] !== null) {
+        if (rotatableTiles.includes(i) && value !== null) {
             tile.classList.add("rotatable");
             tile.innerHTML += " 🔄";
             tile.onclick = () => rotateTile(i);
         }
 
-        // ⏱️ Bomb
-        if (bombTiles.includes(i) && tiles[i] !== null) {
+        if (bombTiles.includes(i) && value !== null) {
             tile.classList.add("bomb");
             tile.innerHTML += ` ⏱️${bombTimers[i]}`;
         }
 
-        // 🧠 Normal move
         if (!lockedTiles.includes(i) && !rotatableTiles.includes(i)) {
             tile.onclick = () => move(i);
         }
@@ -351,6 +348,7 @@ function shareScore() {
 function selectVisualMode() {
     const mode = document.getElementById("visualMode").value;
 
+    // Hide all optional inputs and reset preview
     document.getElementById("flagSelect").style.display = "none";
     document.getElementById("customImage").style.display = "none";
     document.getElementById("imagePreview").style.display = "none";
@@ -359,13 +357,16 @@ function selectVisualMode() {
     if (mode === "emoji") {
         currentTheme = "emoji";
         customImageURL = "";
-        init(gridSize);
+        init(gridSize); // ✅ Start emoji puzzle
     } else if (mode === "flag") {
         document.getElementById("flagSelect").style.display = "inline-block";
+        // ✅ Wait for user to select a flag before initializing
     } else if (mode === "image") {
         document.getElementById("customImage").style.display = "inline-block";
+        // ✅ Wait for user to upload image before initializing
     }
 }
+
 
 // 🌍 Flag Loader
 function loadFlagImage() {
@@ -388,12 +389,13 @@ function loadFlagImage() {
         usa: "🇺🇸 USA's stars represent the 50 states."
     };
 
-    customImageURL = flagMap[flag];
-    currentTheme = "custom";
+    customImageURL = flagMap[flag];         // ✅ Set image URL
+    currentTheme = "custom";                // ✅ Use image slicing logic
     document.getElementById("flagFact").textContent = factMap[flag];
-    showImagePreview();
-    init(gridSize);
+    showImagePreview();                     // ✅ Show preview
+    init(gridSize);                         // ✅ Rebuild puzzle with new image
 }
+
 
 // 🖼️ Image Upload
 function loadCustomImage(event) {
@@ -401,13 +403,26 @@ function loadCustomImage(event) {
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-            customImageURL = e.target.result;
-            currentTheme = "custom";
-            showImagePreview();
-            init(gridSize);
+            customImageURL = e.target.result;  // ✅ Set uploaded image
+            currentTheme = "custom";           // ✅ Use image slicing logic
+            showImagePreview();                // ✅ Show preview
+            init(gridSize);                    // ✅ Rebuild puzzle
         };
         reader.readAsDataURL(file);
     }
+}
+
+function resetToDefault() {
+    document.getElementById("visualMode").value = "";
+    document.getElementById("flagSelect").style.display = "none";
+    document.getElementById("customImage").style.display = "none";
+    document.getElementById("imagePreview").style.display = "none";
+    document.getElementById("flagFact").textContent = "";
+    document.getElementById("imageWarning").style.display = "none";
+
+    currentTheme = "classic";
+    customImageURL = "";
+    init(gridSize);
 }
 
 // 👁️ Preview
