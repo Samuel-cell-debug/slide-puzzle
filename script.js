@@ -5,6 +5,7 @@ let bestDisplay = document.getElementById("bestDisplay");
 let scoreHistory = document.getElementById("scoreHistory");
 
 let tiles = [];
+let previousTiles = [];
 let moveCount = 0;
 let timer;
 let seconds = 0;
@@ -54,12 +55,66 @@ function render() {
             setTimeout(() => tile.classList.remove("shuffle"), 300);
         }
 
+        // 📱 Swipe gestures
+        let startX, startY;
+        tile.addEventListener("touchstart", e => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        tile.addEventListener("touchend", e => {
+            let endX = e.changedTouches[0].clientX;
+            let endY = e.changedTouches[0].clientY;
+            let dx = endX - startX;
+            let dy = endY - startY;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 30) moveSwipe(i, "right");
+                else if (dx < -30) moveSwipe(i, "left");
+            } else {
+                if (dy > 30) moveSwipe(i, "down");
+                else if (dy < -30) moveSwipe(i, "up");
+            }
+        });
+
         puzzle.appendChild(tile);
     });
 }
 
+// 🔙 Undo last move
+function undoMove() {
+    if (previousTiles.length === tiles.length) {
+        tiles = [...previousTiles];
+        moveCount--;
+        render();
+    }
+}
+
+// 📱 Swipe movement logic
+function moveSwipe(i, direction) {
+    const empty = tiles.indexOf(null);
+    const rowI = Math.floor(i / gridSize), colI = i % gridSize;
+    const rowE = Math.floor(empty / gridSize), colE = empty % gridSize;
+
+    let valid = false;
+    if (direction === "left" && colI > 0 && i - 1 === empty) valid = true;
+    if (direction === "right" && colI < gridSize - 1 && i + 1 === empty) valid = true;
+    if (direction === "up" && rowI > 0 && i - gridSize === empty) valid = true;
+    if (direction === "down" && rowI < gridSize - 1 && i + gridSize === empty) valid = true;
+
+    if (valid) move(i);
+}
+
+// 🌙 Dark mode toggle
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+    const isDark = document.body.classList.contains("dark-mode");
+    localStorage.setItem("darkMode", isDark ? "true" : "false");
+}
+
 // 🧠 Move tile if adjacent to empty
 function move(i) {
+    previousTiles = [...tiles];
+
     const empty = tiles.indexOf(null);
     const rowI = Math.floor(i / gridSize), colI = i % gridSize;
     const rowE = Math.floor(empty / gridSize), colE = empty % gridSize;
@@ -124,7 +179,6 @@ function checkWin() {
     puzzle.classList.add("solved");
     document.getElementById("winSound").play();
 
-    // 🎯 Challenge Mode
     let timeLimit = gridSize === 3 ? 60 : gridSize === 4 ? 120 : 180;
     let moveLimit = gridSize === 3 ? 50 : gridSize === 4 ? 100 : 150;
     let challengePassed = seconds <= timeLimit && moveCount <= moveLimit;
@@ -133,7 +187,6 @@ function checkWin() {
         ? `🎉 You beat the challenge! ${moveCount} moves in ${seconds} seconds!`
         : `✅ Puzzle solved, but challenge not met. ${moveCount} moves in ${seconds} seconds.`;
 
-    // 🏅 Best Time
     let bestKey = `bestTime_${gridSize}`;
     let bestTime = localStorage.getItem(bestKey);
     if (!bestTime || seconds < bestTime) {
@@ -141,13 +194,11 @@ function checkWin() {
         message += `\n🏅 New best time for ${gridSize}×${gridSize}: ${seconds} seconds!`;
     }
 
-    // 📜 Score History
     updateScoreHistory(gridSize, seconds);
-
     setTimeout(() => alert(message), 100);
 }
 
-// 📜 Update and Display Score History
+// 📜 Score History
 function updateScoreHistory(level, time) {
     let historyKey = `scoreHistory_${level}`;
     let history = JSON.parse(localStorage.getItem(historyKey)) || [];
@@ -183,7 +234,7 @@ Can you beat my score? Try it here: https://your-username.github.io/slide-puzzle
         navigator.share({
             title: "Slide Puzzle Challenge",
             text: message,
-            url: "https://samuel-cell-debug.github.io/slide-puzzle"
+            url: "https://your-username.github.io/slide-puzzle"
         });
     } else {
         alert("Sharing not supported. Copy and share manually:\n\n" + message);
@@ -192,3 +243,8 @@ Can you beat my score? Try it here: https://your-username.github.io/slide-puzzle
 
 // 🚀 Start game
 init();
+
+// 🌙 Apply saved dark mode
+if (localStorage.getItem("darkMode") === "true") {
+    document.body.classList.add("dark-mode");
+}
