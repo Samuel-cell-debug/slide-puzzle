@@ -109,8 +109,33 @@ button, select {
   z-index: 999;
 }
 
+#imagePreview {
+  margin-top: 10px;
+  max-width: 300px;
+  max-height: 300px;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#imagePreview img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+#flagFact {
+  font-style: italic;
+  color: #555;
+}
+
+#flagSelect,
+#customImage {
+  display: none;
+}
+
 @media (max-width: 600px) {
-  #settingsPanel, #controls, #stats {
+  #controls, #stats {
     width: 90%;
     margin: auto;
     font-size: 16px;
