@@ -2,52 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Samuel's Slide Puzzle</title>
+  <title>Slide Puzzle Game</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="favicon.ico" />
 </head>
 <body>
-  <h1>Samuel's Slide Puzzle Game</h1>
 
-  <div id="controls">
-   <label for="themeSelect">Tile Theme:</label>
-<select id="themeSelect" onchange="changeTheme()">
-  <option value="classic">Classic</option>
-  <option value="emoji">Emoji</option>
-  <option value="flag">Flag</option>
-  <option value="custom">Custom Image</option>
-</select>
-<input type="file" id="customImage" accept="image/*" style="display:none" onchange="loadCustomImage(event)" />
+<div id="splashScreen">
+  <h1>Welcome to Slide Puzzle!</h1>
+  <p>Choose your settings and click Start to begin.</p>
+  <button onclick="startGame()">Start Game</button>
+</div>
 
-<label for="variantSelect">Challenge Mode:</label>
-<select id="variantSelect" onchange="applyVariants()">
-  <option value="none">None</option>
-  <option value="locked">Locked Tiles</option>
-  <option value="rotate">Rotating Tiles</option>
-  <option value="bomb">Time Bombs</option>
-  <option value="all">All Variants</option>
-</select>
+<button id="toggleSettings" onclick="toggleSettingsPanel()">⚙️ Settings</button>
 
-    <button onclick="shuffle()">Shuffle</button>
-    <button onclick="init(gridSize)">Reset</button>
-    <button onclick="undoMove()">Undo</button>
-    <button onclick="toggleDarkMode()">Dark Mode</button>
-    <button onclick="shareScore()">Share Score</button>
+<div id="settingsContainer">
+  <div id="settingsPanel">
+    <h3>Customize Your Game</h3>
+
+    <label for="levelSelect">Level:</label>
+    <select id="levelSelect">
+      <option value="3">Easy (3×3)</option>
+      <option value="4">Medium (4×4)</option>
+      <option value="6">Hard (6×6)</option>
+    </select>
+
+    <label for="themeSelect">Theme:</label>
+    <select id="themeSelect" onchange="changeTheme()">
+      <option value="classic">Classic</option>
+      <option value="emoji">Emoji</option>
+      <option value="flag">Flag</option>
+      <option value="custom">Custom Image</option>
+    </select>
+    <input type="file" id="customImage" accept="image/*" style="display:none" onchange="loadCustomImage(event)" />
+    <div id="themePreview"></div>
+
+    <label for="variantSelect">Challenge Mode:</label>
+    <select id="variantSelect">
+      <option value="none">None</option>
+      <option value="locked">Locked Tiles</option>
+      <option value="rotate">Rotating Tiles</option>
+      <option value="bomb">Time Bombs</option>
+      <option value="all">All Variants</option>
+    </select>
+
+    <label for="soundToggle">Sound:</label>
+    <select id="soundToggle" onchange="toggleSound()">
+      <option value="on">On</option>
+      <option value="off">Off</option>
+    </select>
+
+    <button onclick="applySettings()">Select</button>
   </div>
+</div>
 
-  <div id="stats">
-    <span id="moveDisplay">Move: 0</span> |
-    <span id="timerDisplay">Time: 0s</span> |
-    <span id="bestDisplay">Best: --</span>
-  </div>
+<div id="controls">
+  <button onclick="shuffle()">Shuffle</button>
+  <button onclick="undoMove()">Undo</button>
+  <button onclick="toggleDarkMode()">Dark Mode</button>
+  <button onclick="shareScore()">Share Score</button>
+</div>
 
-  <div id="puzzle"></div>
+<div id="stats">
+  <span id="moveDisplay">Move: 0</span> |
+  <span id="timerDisplay">Time: 0s</span> |
+  <span id="bestDisplay">Best: --</span>
+</div>
 
-  <div id="scoreHistory"></div>
+<div id="puzzle"></div>
+<div id="scoreHistory"></div>
 
-  <audio id="moveSound" src="Move.mp3"></audio>
-  <audio id="winSound" src="Win.mp3"></audio>
+<audio id="moveSound" src="move.mp3"></audio>
+<audio id="winSound" src="win.mp3"></audio>
 
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
