@@ -1,4 +1,4 @@
-# 🎮 3x3 Slide Puzzle Game
+# 🎮 Samuel's Slide Puzzle Game
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
