@@ -2,6 +2,7 @@ let puzzle = document.getElementById("puzzle");
 let moveDisplay = document.getElementById("moveDisplay");
 let timerDisplay = document.getElementById("timerDisplay");
 let bestDisplay = document.getElementById("bestDisplay");
+let scoreHistory = document.getElementById("scoreHistory");
 
 let tiles = [];
 let moveCount = 0;
@@ -20,13 +21,16 @@ function init(size = 3) {
     clearInterval(timer);
     puzzle.classList.remove("solved");
     render();
+    displayScoreHistory(gridSize);
 }
 
 // 🎨 Render puzzle tiles
 function render() {
     puzzle.innerHTML = '';
-    puzzle.style.gridTemplateColumns = `repeat(${gridSize}, 100px)`;
-    puzzle.style.gridTemplateRows = `repeat(${gridSize}, 100px)`;
+
+    const tileSize = gridSize === 3 ? 100 : gridSize === 4 ? 80 : 60;
+    puzzle.style.gridTemplateColumns = `repeat(${gridSize}, ${tileSize}px)`;
+    puzzle.style.gridTemplateRows = `repeat(${gridSize}, ${tileSize}px)`;
 
     moveDisplay.textContent = "Move: " + moveCount;
     timerDisplay.textContent = "Time: " + seconds + "s";
@@ -40,7 +44,16 @@ function render() {
         tile.className = "title" + (num === null ? " empty" : "");
         tile.textContent = num !== null ? num : "";
         tile.tabIndex = 0;
+        tile.style.lineHeight = `${tileSize}px`;
+        tile.style.fontSize = `${tileSize / 3}px`;
         tile.onclick = () => move(i);
+
+        // 🎞️ Shuffle animation
+        if (moveCount === 0 && seconds === 0) {
+            tile.classList.add("shuffle");
+            setTimeout(() => tile.classList.remove("shuffle"), 300);
+        }
+
         puzzle.appendChild(tile);
     });
 }
@@ -111,7 +124,7 @@ function checkWin() {
     puzzle.classList.add("solved");
     document.getElementById("winSound").play();
 
-    // 🎯 Challenge Mode (adaptive)
+    // 🎯 Challenge Mode
     let timeLimit = gridSize === 3 ? 60 : gridSize === 4 ? 120 : 180;
     let moveLimit = gridSize === 3 ? 50 : gridSize === 4 ? 100 : 150;
     let challengePassed = seconds <= timeLimit && moveCount <= moveLimit;
@@ -120,7 +133,7 @@ function checkWin() {
         ? `🎉 You beat the challenge! ${moveCount} moves in ${seconds} seconds!`
         : `✅ Puzzle solved, but challenge not met. ${moveCount} moves in ${seconds} seconds.`;
 
-    // 🏅 Leaderboard
+    // 🏅 Best Time
     let bestKey = `bestTime_${gridSize}`;
     let bestTime = localStorage.getItem(bestKey);
     if (!bestTime || seconds < bestTime) {
@@ -128,7 +141,53 @@ function checkWin() {
         message += `\n🏅 New best time for ${gridSize}×${gridSize}: ${seconds} seconds!`;
     }
 
+    // 📜 Score History
+    updateScoreHistory(gridSize, seconds);
+
     setTimeout(() => alert(message), 100);
+}
+
+// 📜 Update and Display Score History
+function updateScoreHistory(level, time) {
+    let historyKey = `scoreHistory_${level}`;
+    let history = JSON.parse(localStorage.getItem(historyKey)) || [];
+    history.push({ time, date: new Date().toLocaleString() });
+    history = history.slice(-5);
+    localStorage.setItem(historyKey, JSON.stringify(history));
+    displayScoreHistory(level);
+}
+
+function displayScoreHistory(level) {
+    let historyKey = `scoreHistory_${level}`;
+    let history = JSON.parse(localStorage.getItem(historyKey)) || [];
+    let html = `<h3>Recent Scores (${level}×${level})</h3><ul>`;
+    history.forEach(score => {
+        html += `<li>${score.time}s on ${score.date}</li>`;
+    });
+    html += `</ul>`;
+    scoreHistory.innerHTML = html;
+}
+
+// 🎛️ Level Selector
+function changeLevel() {
+    const level = parseInt(document.getElementById("levelSelect").value);
+    init(level);
+}
+
+// 📤 Share Score
+function shareScore() {
+    const message = `I just solved a ${gridSize}×${gridSize} slide puzzle in ${moveCount} moves and ${seconds} seconds! 🎉
+Can you beat my score? Try it here: https://your-username.github.io/slide-puzzle`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: "Slide Puzzle Challenge",
+            text: message,
+            url: "https://your-username.github.io/slide-puzzle"
+        });
+    } else {
+        alert("Sharing not supported. Copy and share manually:\n\n" + message);
+    }
 }
 
 // 🚀 Start game
