@@ -451,7 +451,6 @@ function loadFlagImage() {
     showImagePreview();
     init(gridSize);
 }
-
 function loadCustomImage(event) {
     const file = event.target.files[0];
     if (!file) {
@@ -470,4 +469,10 @@ function loadCustomImage(event) {
             init(gridSize);
         } catch (error) {
             console.error("Error loading image:", error);
-            document.getElementById("imageWarning").textContent = "⚠️ Failed to load image
+            document.getElementById("imageWarning").textContent = "⚠️ Failed to load image.";
+            document.getElementById("imageWarning").style.display = "block";
+        }
+    };
+
+    reader.readAsDataURL(file);
+}
