@@ -1,3 +1,4 @@
+let historyStack = [];
 let tileElements = []; // Cache for tile DOM elements
 let puzzle = document.getElementById("puzzle");
 let moveDisplay = document.getElementById("moveDisplay");
@@ -176,12 +177,13 @@ function render() {
 
 // 🔙 Undo
 function undoMove() {
-    if (previousTiles.length === tiles.length) {
-        tiles = [...previousTiles];
-        moveCount--;
+    if (historyStack.length > 0) {
+        tiles = historyStack.pop();
+        moveCount = Math.max(0, moveCount - 1);
         render();
     }
 }
+
 
 // 🌙 Dark Mode
 function toggleDarkMode() {
@@ -199,7 +201,6 @@ function rotateTile(i) {
 // 🧠 Move
 function move(i) {
     if (lockedTiles.includes(i)) return;
-    previousTiles = [...tiles];
 
     const empty = tiles.indexOf(null);
     const rowI = Math.floor(i / gridSize), colI = i % gridSize;
@@ -207,12 +208,17 @@ function move(i) {
 
     const isAdjacent = Math.abs(rowI - rowE) + Math.abs(colI - colE) === 1;
     if (isAdjacent) {
+        // 🧠 Save current state
+        historyStack.push([...tiles]);
+
         if (soundEnabled) document.getElementById("moveSound").play();
         [tiles[i], tiles[empty]] = [tiles[empty], tiles[i]];
         moveCount++;
         render();
         checkWin();
     }
+}
+
 }
 
 // 🔀 Shuffle
@@ -228,6 +234,24 @@ function shuffle() {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
         }
+function isTooEasy(arr) {
+    let correct = 0;
+    for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] === i + 1) correct++;
+    }
+    return correct >= arr.length - 4; // Too close to solved
+}
+    do {
+    shuffled = [...Array(total - 1).keys()].map(i => i + 1);
+    shuffled.push(null);
+
+    for (let i = total - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+        
+} while (!isSolvable(shuffled) || isTooEasy(shuffled));
+
     } while (!isSolvable(shuffled));
 
     tiles = shuffled;
