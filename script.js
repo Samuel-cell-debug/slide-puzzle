@@ -1,3 +1,4 @@
+let tileElements = []; // Cache for tile DOM elements
 let puzzle = document.getElementById("puzzle");
 let moveDisplay = document.getElementById("moveDisplay");
 let timerDisplay = document.getElementById("timerDisplay");
@@ -81,17 +82,34 @@ function init(size = 3) {
     puzzle.classList.remove("solved");
 
     applyVariants();
-    render();
-    displayScoreHistory(gridSize);
-}
 
-// 🎨 Render Puzzle
-function render() {
+    // 🧩 Create tile elements once
     puzzle.innerHTML = '';
+    tileElements = [];
+
     const tileSize = gridSize === 3 ? 100 : gridSize === 4 ? 80 : 60;
     puzzle.style.gridTemplateColumns = `repeat(${gridSize}, ${tileSize}px)`;
     puzzle.style.gridTemplateRows = `repeat(${gridSize}, ${tileSize}px)`;
 
+    for (let i = 0; i < total; i++) {
+        const tile = document.createElement("div");
+        tile.className = "title";
+        tile.tabIndex = 0;
+        tile.style.width = `${tileSize}px`;
+        tile.style.height = `${tileSize}px`;
+        tile.style.lineHeight = `${tileSize}px`;
+        tile.style.fontSize = `${tileSize / 3}px`;
+        puzzle.appendChild(tile);
+        tileElements.push(tile);
+    }
+
+    render();
+    displayScoreHistory(gridSize);
+}
+
+
+// 🎨 Render Puzzle
+function render() {
     moveDisplay.textContent = "Move: " + moveCount;
     timerDisplay.textContent = "Time: " + seconds + "s";
 
@@ -100,13 +118,11 @@ function render() {
     bestDisplay.textContent = "Best: " + (best ? best + "s" : "--");
 
     tiles.forEach((value, i) => {
-        let tile = document.createElement("div");
+        const tile = tileElements[i];
         tile.className = "title" + (value === null ? " empty" : "");
-        tile.tabIndex = 0;
-        tile.style.width = `${tileSize}px`;
-        tile.style.height = `${tileSize}px`;
-        tile.style.lineHeight = `${tileSize}px`;
-        tile.style.fontSize = `${tileSize / 3}px`;
+        tile.innerHTML = "";
+        tile.style.backgroundImage = "";
+        tile.style.color = "";
 
         if (value !== null) {
             if (currentTheme === "custom" && customImageURL) {
@@ -129,34 +145,32 @@ function render() {
             } else {
                 tile.textContent = value;
             }
-        } else {
-            tile.textContent = "";
-            tile.style.backgroundImage = "";
-            tile.style.color = "";
         }
 
+        // 🔒 Locked
         if (lockedTiles.includes(i) && value !== null) {
             tile.classList.add("locked");
             tile.innerHTML += " 🔒";
             tile.onclick = null;
         }
 
+        // 🔄 Rotatable
         if (rotatableTiles.includes(i) && value !== null) {
             tile.classList.add("rotatable");
             tile.innerHTML += " 🔄";
             tile.onclick = () => rotateTile(i);
         }
 
+        // ⏱️ Bomb
         if (bombTiles.includes(i) && value !== null) {
             tile.classList.add("bomb");
             tile.innerHTML += ` ⏱️${bombTimers[i]}`;
         }
 
+        // 🧠 Normal move
         if (!lockedTiles.includes(i) && !rotatableTiles.includes(i)) {
             tile.onclick = () => move(i);
         }
-
-        puzzle.appendChild(tile);
     });
 }
 
@@ -203,33 +217,44 @@ function move(i) {
 
 // 🔀 Shuffle
 function shuffle() {
-    do {
-        for (let i = tiles.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
-        }
-    } while (!isSolvable());
+    const total = gridSize * gridSize;
+    let shuffled;
 
+    do {
+        shuffled = [...Array(total - 1).keys()].map(i => i + 1);
+        shuffled.push(null);
+
+        for (let i = total - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+    } while (!isSolvable(shuffled));
+
+    tiles = shuffled;
     moveCount = 0;
     seconds = 0;
+
     clearInterval(timer);
     timer = setInterval(() => {
         seconds++;
         timerDisplay.textContent = "Time: " + seconds + "s";
     }, 1000);
+
     render();
 }
 
+
 // ✅ Solvable
-function isSolvable() {
+function isSolvable(arr) {
     let inv = 0;
-    for (let i = 0; i < tiles.length - 1; i++) {
-        for (let j = i + 1; j < tiles.length - 1; j++) {
-            if (tiles[i] && tiles[j] && tiles[i] > tiles[j]) inv++;
+    for (let i = 0; i < arr.length - 1; i++) {
+        for (let j = i + 1; j < arr.length - 1; j++) {
+            if (arr[i] && arr[j] && arr[i] > arr[j]) inv++;
         }
     }
     return inv % 2 === 0;
 }
+
 
 // 🏆 Win
 function checkWin() {
